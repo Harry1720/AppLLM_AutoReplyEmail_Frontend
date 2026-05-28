@@ -10,7 +10,7 @@ export default function FloatingAiButton({ onClick, isGenerating }: FloatingAiBu
     <button
       onClick={onClick}
       disabled={isGenerating}
-      className="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-50 disabled:opacity-50 disabled:cursor-not-allowed group"
+      className="fixed bottom-8 right-8 w-16 h-16 bg-gradient-to-br from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-50 disabled:opacity-50 disabled:cursor-not-allowed group cursor-pointer"
       title="Tạo câu trả lời với AI"
     >
       {isGenerating ? (
