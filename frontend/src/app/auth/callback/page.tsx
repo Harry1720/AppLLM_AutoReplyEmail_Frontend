@@ -1,109 +1,106 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation'; // Dùng để đọc dữ liệu trên thanh địa chỉ (URL)
-import Image from 'next/image';
-import { exchangeCodeForToken, syncAiData, checkSyncStatus } from '@/services/api';
+import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation"; // Dùng để đọc dữ liệu trên thanh địa chỉ (URL)
+import Image from "next/image";
+import {
+  exchangeCodeForToken,
+  syncAiData,
+  checkSyncStatus,
+} from "@/services/api";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(true);
-  const [syncMessage, setSyncMessage] = useState<string>('Đang xác thực...');
+  const [syncMessage, setSyncMessage] = useState<string>("Đang xác thực...");
+  const hasHandledCallback = useRef(false);
 
   useEffect(() => {
+    if (hasHandledCallback.current) {
+      return;
+    }
+
+    hasHandledCallback.current = true;
+
     const handleCallback = async () => {
       // Get the authorization code from URL
-      const code = searchParams.get('code');
-      const errorParam = searchParams.get('error');
+      const code = searchParams.get("code");
+      const errorParam = searchParams.get("error");
 
       // Nếu Google báo lỗi hoặc không tìm thấy code -> Báo lỗi và chuyển về trang chủ sau 3s
       if (errorParam) {
-        setError('Đăng nhập bị hủy hoặc thất bại');
+        setError("Đăng nhập bị hủy hoặc thất bại");
         setIsProcessing(false);
         setTimeout(() => {
-          router.push('/');
+          router.push("/");
         }, 3000);
         return;
       }
 
       if (!code) {
-        setError('Không tìm thấy mã xác thực');
+        setError("Không tìm thấy mã xác thực");
         setIsProcessing(false);
         setTimeout(() => {
-          router.push('/');
+          router.push("/");
         }, 3000);
         return;
       }
 
       try {
         // Exchange code for token
-        setSyncMessage('Đang xác thực...');
+        setSyncMessage("Đang xác thực...");
         const data = await exchangeCodeForToken(code); // Gọi API gửi code lên server, server sẽ trả về Token đăng nhập
-        
-        console.log('Login successful:', data);
-        
+
+        console.log("Login successful:", data);
+
         // Check if sync is needed
-        setSyncMessage('Kiểm tra ngữ cảnh...'); // Đổi thông báo
+        setSyncMessage("Kiểm tra ngữ cảnh..."); // Đổi thông báo
         const syncStatus = await checkSyncStatus(); // Hỏi server xem user này đã đồng bộ dữ liệu AI chưa
-        
-        if (!syncStatus.synced) { // Nếu server trả về là chưa đồng bộ
-          // Start AI sync and wait for it
-          setSyncMessage('Đang xử lý lấy ngữ cảnh từ email đã gửi...');
+
+        if (!syncStatus.synced) {
+          // Nếu server trả về là chưa đồng bộ
+          // Chỉ khởi tạo sync một lần rồi chuyển sang workspace để tránh polling dày trên UI
+          setSyncMessage("Đang khởi tạo xử lý ngữ cảnh từ email đã gửi...");
           await syncAiData(); //gọi Server bắt đầu quá trình đọc email (Vector embedding)
-          
-          // Poll sync status until complete (max 60 seconds)
-          const maxAttempts = 30; // 30 attempts × 2 seconds = 60 seconds
-          let attempts = 0;
-          
-          while (attempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            //Sleep" => tạo ra 1 Promise sẽ hoàn thành sau 2s. await giúp code "ngủ" 2 giây trước khi chạy dòng tiếp theo.
-            
-            const status = await checkSyncStatus(); //Hỏi lại server đã lấy ngữ cảnh xong chưa
-            if (status.synced) { //Đã lấy xong
-              setSyncMessage(`✅ Đã lấy ngữ cảnh`);
-              break;
-            }
-            
-            attempts++; // Nếu chưa xong -> tăng biến đếm và lặp lại
-            setSyncMessage(`Đang xử lý lấy ngữ cảnh...`);
-          }
-          
-          if (attempts >= maxAttempts) {
-            setSyncMessage('Quá thời gian chờ. Ngữ cảnh sẽ được xử lý trong nền.');
-          }
+
+          setSyncMessage(
+            "Bắt đầu xử lý ngữ cảnh ở nền. Đang chuyển vào workspace...",
+          );
         } else {
           setSyncMessage(`✅ Đã có ngữ cảnh`);
         }
-        
-        // Wait a moment before redirect
-        await new Promise(resolve => setTimeout(resolve, 1000)); //Chờ 1 giây để người dùng thấy UI "Đã lấy ngữ cảnh" trước khi chuyển trang.
-        
-        // Redirect to workspace
-        router.push('/workspace');
 
-      } catch (err: unknown) { //Nếu bất kỳ lệnh await nào ở trên bị lỗi -> nhảy thẳng xuống đây
-        console.error('Authentication error:', err);
-        const errorMessage = err instanceof Error ? err.message : 'Đăng nhập thất bại. Vui lòng thử lại.';
+        // Wait a moment before redirect
+        await new Promise((resolve) => setTimeout(resolve, 1000)); //Chờ 1 giây để người dùng thấy UI "Đã lấy ngữ cảnh" trước khi chuyển trang.
+
+        // Redirect to workspace
+        router.push("/workspace");
+      } catch (err: unknown) {
+        //Nếu bất kỳ lệnh await nào ở trên bị lỗi -> nhảy thẳng xuống đây
+        console.error("Authentication error:", err);
+        const errorMessage =
+          err instanceof Error
+            ? err.message
+            : "Đăng nhập thất bại. Vui lòng thử lại.";
         setError(errorMessage);
         setIsProcessing(false);
         setTimeout(() => {
-          router.push('/');
+          router.push("/");
         }, 3000);
       }
     };
 
-    handleCallback();// Gọi hàm async vừa định nghĩa ở trên để nó bắt đầu chạy
-  }, [searchParams, router]);// useEffect sẽ chạy lại nếu searchParams hoặc router thay đổi (thực tế chỉ chạy 1 lần khi load trang)
+    handleCallback(); // Gọi hàm async vừa định nghĩa ở trên để nó bắt đầu chạy
+  }, [searchParams, router]); // useEffect sẽ chạy lại nếu searchParams hoặc router thay đổi (thực tế chỉ chạy 1 lần khi load trang)
 
   return (
     <div className="min-h-screen relative flex items-center justify-center px-4">
       {/* Background image with overlay */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/uth.png"
+          src="/context.png"
           alt="Background"
           fill
           className="object-cover"
@@ -111,25 +108,27 @@ export default function AuthCallbackPage() {
         />
         <div className="absolute inset-0 bg-white/30"></div>
       </div>
-      
+
       <div className="max-w-md w-full bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-8 text-center relative z-10">
         {isProcessing ? (
           <>
             <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto mb-4"></div>
             <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              {syncMessage.includes('✅') ? 'Hoàn tất!' : 'Đang xử lý...'} 
+              {syncMessage.includes("✅") ? "Hoàn tất!" : "Đang xử lý..."}
               {/* Nếu tiến trình đồng bộ thành công thì hiển thị Hoàn tất */}
             </h2>
-            <p className="text-gray-600">
-              {syncMessage}
-            </p>
-            {syncMessage.includes('Đang xử lý lấy ngữ cảnh') && (
+            <p className="text-gray-600">{syncMessage}</p>
+            {syncMessage.includes("Đang xử lý lấy ngữ cảnh") && (
               <div className="mt-4">
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div className="bg-blue-500 h-2 rounded-full animate-pulse" style={{width: '60%'}}></div>
+                  <div
+                    className="bg-blue-500 h-2 rounded-full animate-pulse"
+                    style={{ width: "60%" }}
+                  ></div>
                 </div>
                 <p className="text-xs text-gray-500 mt-2">
-                  Hệ thống đang phân tích email đã gửi để cải thiện chất lượng gợi ý AI. Vui lòng đợi một lát.
+                  Hệ thống đang phân tích email đã gửi để cải thiện chất lượng
+                  gợi ý AI. Vui lòng đợi một lát.
                 </p>
               </div>
             )}

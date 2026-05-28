@@ -223,11 +223,11 @@ export default function ComposePage() {
   };
 
   return (
-    <div className="h-screen flex bg-gray-50">
+    <div className="h-screen flex">
       {/* Left Panel - Email List */}
       <div className="w-90 border-r border-gray-200 bg-white flex flex-col">
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">Hộp thư đã gửi</h2>
+          <h2 className="text-lg font-semibold text-gray-900 py-0.5">Hộp thư đã gửi</h2>
           <button
             onClick={handleNewEmail}
             className="text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
