@@ -17,6 +17,7 @@ export default function Header({ onSync, isSyncing = false }: HeaderProps) {
   const pathname = usePathname();
   const { confirm } = useConfirm();
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [userProfile, setUserProfile] = useState<{
     id: string;
     email: string;
@@ -24,14 +25,25 @@ export default function Header({ onSync, isSyncing = false }: HeaderProps) {
     picture?: string;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const headerRef = useRef<HTMLElement | null>(null);
   const avatarBtnRef = useRef<HTMLButtonElement | null>(null);
+  const mobileMenuButtonRef = useRef<HTMLButtonElement | null>(null);
   const [menuPos, setMenuPos] = useState<{ top: number; left: number } | null>(
     null,
   );
+  const [mobileMenuPos, setMobileMenuPos] = useState<{
+    top: number;
+    left: number;
+    width: number;
+  } | null>(null);
 
   useEffect(() => {
     loadUserProfile();
   }, []);
+
+  useEffect(() => {
+    setShowMobileMenu(false);
+  }, [pathname]);
 
   const loadUserProfile = async () => {
     try {
@@ -90,15 +102,52 @@ export default function Header({ onSync, isSyncing = false }: HeaderProps) {
     }
   }, [showUserMenu]);
 
+  useEffect(() => {
+    if (!showMobileMenu || !mobileMenuButtonRef.current) {
+      setMobileMenuPos(null);
+      return;
+    }
+
+    const updateMobileMenuPosition = () => {
+      if (!headerRef.current || !mobileMenuButtonRef.current) {
+        return;
+      }
+
+      const headerRect = headerRef.current.getBoundingClientRect();
+      const buttonRect = mobileMenuButtonRef.current.getBoundingClientRect();
+      const width = Math.min(320, window.innerWidth - 32);
+      const left = Math.max(
+        16,
+        Math.min(buttonRect.right - width, window.innerWidth - width - 16),
+      );
+
+      setMobileMenuPos({
+        top: headerRect.bottom + 12,
+        left,
+        width,
+      });
+    };
+
+    updateMobileMenuPosition();
+    window.addEventListener("resize", updateMobileMenuPosition);
+
+    return () => {
+      window.removeEventListener("resize", updateMobileMenuPosition);
+    };
+  }, [showMobileMenu]);
+
   return (
-    <header className="relative mx-4 mt-4 overflow-hidden rounded-[24px] border border-white/60 bg-white/70 px-6 py-4 shadow-[0_12px_40px_rgba(93,141,255,0.10)] backdrop-blur-xl">
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(122,168,255,0.2),_transparent_32%),radial-gradient(circle_at_top_right,_rgba(93,141,255,0.12),_transparent_28%)]" />
-      <div className="relative flex items-center justify-between gap-4">
+    <header
+      ref={headerRef}
+      className="relative mx-4 mt-4 overflow-hidden rounded-3xl border border-white/60 bg-white/70 px-4 py-3 shadow-[0_12px_40px_rgba(93,141,255,0.10)] backdrop-blur-xl sm:px-6 sm:py-4"
+    >
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(122,168,255,0.2),transparent_32%),radial-gradient(circle_at_top_right,rgba(93,141,255,0.12),transparent_28%)]" />
+      <div className="relative flex gap-4 flex-row lg:items-center lg:justify-between">
         {/* Logo and Title */}
-        <div className="flex items-center space-x-3">
-          <div className="mx-auto mb-0 flex h-12 w-12 items-center justify-center">
+        <div className="flex items-center justify-between gap-3 lg:justify-start">
+          <div className="mx-auto mb-0 flex h-12 w-12 items-center justify-center shrink-0">
             <Image
-              src="/logo_tab.png"
+              src="/logo_navbar.png"
               alt="Logo"
               width={40}
               height={40}
@@ -107,7 +156,7 @@ export default function Header({ onSync, isSyncing = false }: HeaderProps) {
             />
           </div>
 
-          <div className="ml-4">
+          <div className="whitespace-nowrap hidden sm:block">
             <h1 className="font-semibold text-slate-900">
               Trợ lý Email thông minh
             </h1>
@@ -115,13 +164,13 @@ export default function Header({ onSync, isSyncing = false }: HeaderProps) {
         </div>
 
         {/* Navigation - Centered */}
-        <nav className="absolute left-1/2 flex -translate-x-1/2 items-center space-x-3">
+        <nav className="hidden w-full flex-wrap items-center justify-center gap-2 lg:absolute lg:left-1/2 lg:flex lg:w-auto lg:-translate-x-1/2 lg:gap-3">
           <button
             onClick={() => router.push("/workspace")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+            className={`rounded-lg px-3 py-3 text-sm font-medium transition-colors cursor-pointer sm:px-4 ${
               pathname === "/workspace"
-                ? "bg-linear-to-r from-blue-600 to-indigo-500 text-white shadow-[0_0px_24px_rgba(93,141,255,0.9)]"
-                : "text-slate-600 hover:bg-blue-50 hover:text-slate-900"
+                ? "bg-linear-to-r from-blue-600 to-indigo-500 text-white shadow-[0_0px_24px_rgba(93,141,255,0.9)] hover:-translate-y-0.5 transition-all"
+                : "text-slate-600 hover:text-slate-900 cursor-pointer rounded-xl border border-white/60 bg-white/65 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(93,141,255,0.10)]"
             }`}
           >
             <div className="flex items-center space-x-2">
@@ -144,10 +193,10 @@ export default function Header({ onSync, isSyncing = false }: HeaderProps) {
 
           <button
             onClick={() => router.push("/compose")}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
+            className={`px-4 py-3 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
               pathname === "/compose"
-                ? "bg-linear-to-r from-blue-600 to-indigo-500 text-white shadow-[0_0px_24px_rgba(93,141,255,0.9)]"
-                : "text-slate-600 hover:bg-blue-50 hover:text-slate-900"
+                ? "bg-linear-to-r from-blue-600 to-indigo-500 text-white shadow-[0_0px_24px_rgba(93,141,255,0.9)] hover:-translate-y-0.5 transition-all"
+                : "text-slate-600 hover:text-slate-900 cursor-pointer rounded-xl border border-white/60 bg-white/65 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(93,141,255,0.10)]"
             }`}
           >
             <div className="flex items-center space-x-2">
@@ -170,13 +219,13 @@ export default function Header({ onSync, isSyncing = false }: HeaderProps) {
         </nav>
 
         {/* Right side actions */}
-        <div className="flex items-center space-x-4">
+        <div className="flex w-full items-center justify-end gap-3 lg:w-auto lg:justify-normal lg:space-x-4">
           {/* Sync button */}
           {onSync && (
             <button
               onClick={handleSync}
               disabled={isSyncing}
-              className="rounded-xl border border-white/60 bg-white/65 p-2 text-slate-500 shadow-sm transition-all hover:-translate-y-0.5 hover:text-slate-700 hover:shadow-[0_8px_20px_rgba(93,141,255,0.10)] cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              className="cursor-pointer rounded-xl border border-white/60 bg-white/65 p-3 text-slate-500 shadow-sm transition-all hover:-translate-y-0.5 hover:text-slate-700 hover:shadow-[0_8px_20px_rgba(93,141,255,0.10)] disabled:cursor-not-allowed disabled:opacity-50"
               title={isSyncing ? "Đang đồng bộ..." : "Đồng bộ email"}
             >
               <svg
@@ -195,6 +244,32 @@ export default function Header({ onSync, isSyncing = false }: HeaderProps) {
             </button>
           )}
 
+          <button
+            ref={mobileMenuButtonRef}
+            type="button"
+            onClick={() => {
+              setShowUserMenu(false);
+              setShowMobileMenu((open) => !open);
+            }}
+            className="flex cursor-pointer items-center justify-center rounded-xl border border-white/60 bg-white/65 p-3 text-slate-600 shadow-sm transition-all hover:-translate-y-0.5 hover:text-slate-900 hover:shadow-[0_8px_20px_rgba(93,141,255,0.10)] lg:hidden"
+            aria-label="Mở menu điều hướng"
+            aria-expanded={showMobileMenu}
+          >
+            <svg
+              className="h-5 w-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 6h16M4 12h16M4 18h16"
+              />
+            </svg>
+          </button>
+
           {/* User menu */}
           <div className="relative">
             {isLoading ? (
@@ -207,8 +282,11 @@ export default function Header({ onSync, isSyncing = false }: HeaderProps) {
                   ref={(el) => {
                     avatarBtnRef.current = el;
                   }}
-                  onClick={() => setShowUserMenu((s) => !s)}
-                  className="flex items-center space-x-2 rounded-xl border border-white/60 bg-white/65 p-2 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(93,141,255,0.10)] cursor-pointer"
+                  onClick={() => {
+                    setShowMobileMenu(false);
+                    setShowUserMenu((s) => !s);
+                  }}
+                  className="flex cursor-pointer items-center space-x-2 rounded-xl border border-white/60 bg-white/65 p-1.5 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_20px_rgba(93,141,255,0.10)]"
                 >
                   <div className="w-8 h-8 bg-linear-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center overflow-hidden">
                     {userProfile?.picture ? (
@@ -246,7 +324,7 @@ export default function Header({ onSync, isSyncing = false }: HeaderProps) {
                   createPortal(
                     <>
                       <div
-                        className="fixed inset-0 z-30"
+                        className="fixed inset-0 z-30 bg-black/20 backdrop-blur-sm"
                         onClick={() => setShowUserMenu(false)}
                       />
                       <div
@@ -346,6 +424,95 @@ export default function Header({ onSync, isSyncing = false }: HeaderProps) {
           </div>
         </div>
       </div>
+
+      {showMobileMenu &&
+        typeof document !== "undefined" &&
+        createPortal(
+          <>
+            <div
+              className="fixed inset-0 z-30 bg-black/20 backdrop-blur-sm"
+              onClick={() => setShowMobileMenu(false)}
+            />
+            <div
+              style={{
+                position: "fixed",
+                top: mobileMenuPos ? mobileMenuPos.top : 0,
+                left: mobileMenuPos ? mobileMenuPos.left : 16,
+                width: mobileMenuPos
+                  ? mobileMenuPos.width
+                  : "calc(100vw - 32px)",
+              }}
+              className="z-40 lg:hidden"
+            >
+              <div className="overflow-hidden rounded-2xl border border-white/70 bg-white/95 shadow-[0_20px_50px_rgba(15,23,42,0.16)] backdrop-blur-xl">
+                <div className="border-b border-slate-100 px-4 py-3">
+                  <p className="text-sm font-semibold text-slate-900">
+                    Điều hướng
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Chọn tác vụ bạn muốn dùng
+                  </p>
+                </div>
+                <div className="p-2">
+                  <button
+                    onClick={() => {
+                      setShowMobileMenu(false);
+                      router.push("/workspace");
+                    }}
+                    className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-colors cursor-pointer ${
+                      pathname === "/workspace"
+                        ? "bg-linear-to-r from-blue-600 to-indigo-500 text-white shadow-[0_0px_24px_rgba(93,141,255,0.9)] hover:-translate-y-0.5 transition-all"
+                        : "text-slate-700 hover:bg-blue-50 hover:text-slate-900"
+                    }`}
+                  >
+                    <svg
+                      className="h-4 w-4 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"
+                      />
+                    </svg>
+                    <span>Trả lời email với AI</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setShowMobileMenu(false);
+                      router.push("/compose");
+                    }}
+                    className={`mt-1 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-colors cursor-pointer ${
+                      pathname === "/compose"
+                        ? "bg-linear-to-r from-blue-600 to-indigo-500 text-white shadow-[0_0px_24px_rgba(93,141,255,0.9)] hover:-translate-y-0.5 transition-all"
+                        : "text-slate-700 hover:bg-blue-50 hover:text-slate-900"
+                    }`}
+                  >
+                    <svg
+                      className="h-4 w-4 shrink-0"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                    <span>Soạn email mới</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </>,
+          document.body,
+        )}
     </header>
   );
 }
