@@ -213,7 +213,7 @@ export default function EmailList({
             <button
               onClick={onLoadMore}
               disabled={isLoadingMore}
-              className="w-full rounded-2xl border border-blue-100 bg-white/70 px-4 py-2 text-sm font-medium text-blue-700 shadow-sm transition-all hover:-translate-y-0.5 hover:bg-white hover:shadow-[0_10px_22px_rgba(93,141,255,0.08)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+              className="w-full rounded-2xl border border-blue-100 bg-sky-50 px-4 py-2 text-sm font-medium text-blue-700 transition-all hover:-translate-y-0.5 hover:bg-sky-100 shadow-[0_10px_22px_rgba(93,141,255,0.08)] disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
             >
               {isLoadingMore ? (
                 <span className="flex items-center justify-center">
@@ -239,7 +239,7 @@ export default function EmailList({
                   Đang tải...
                 </span>
               ) : (
-                "Tải thêm"
+                "↓ Tải thêm"
               )}
             </button>
           </div>
