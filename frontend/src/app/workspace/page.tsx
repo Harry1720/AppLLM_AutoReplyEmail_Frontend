@@ -8,6 +8,7 @@ import EmailContent from "@/components/EmailContent";
 import AiSuggestionPanel from "@/components/AiSuggestionPanel";
 import Header from "@/components/Header";
 import FloatingAiButton from "@/components/FloatingAiButton";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 // Import các hàm gọi API (Service)
 import {
@@ -538,7 +539,7 @@ export default function WorkspacePage() {
                     INBOX
                   </p>
                   <h2 className="pt-1 text-lg font-semibold text-slate-900">
-                    HỘP THƯ CỦA BẠN
+                    HỘP THƯ ĐẾN
                   </h2>
                   {selectedEmailIds.length > 0 && (
                     <div className="mt-1 flex items-center space-x-2">
@@ -565,25 +566,11 @@ export default function WorkspacePage() {
                       title="Tạo câu trả lời với AI"
                     >
                       {isGeneratingAi ? (
-                        <svg
-                          className="h-5 w-5 animate-spin"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
+                        <LoadingSpinner
+                          className="h-5 w-5"
+                          trackClassName="text-white/35"
+                          arcClassName="text-white"
+                        />
                       ) : (
                         <>
                           <svg
@@ -613,7 +600,7 @@ export default function WorkspacePage() {
             <div className="min-h-0 flex-1 overflow-hidden">
               {isLoading ? (
                 <div className="flex h-full items-center justify-center">
-                  <div className="h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600"></div>
+                  <LoadingSpinner className="h-8 w-8" />
                 </div>
               ) : error ? (
                 <div className="flex h-full items-center justify-center p-4">
@@ -679,25 +666,7 @@ export default function WorkspacePage() {
                   {isLoadingDetail ? (
                     <div className="flex h-full items-center justify-center">
                       <div className="text-center">
-                        <svg
-                          className="mx-auto h-12 w-12 animate-spin text-blue-600"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          ></circle>
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                          ></path>
-                        </svg>
+                        <LoadingSpinner className="mx-auto h-12 w-12" />
                         <p className="mt-4 text-sm text-slate-600">
                           Đang tải nội dung email...
                         </p>
@@ -753,7 +722,7 @@ export default function WorkspacePage() {
                   INBOX
                 </p>
                 <h2 className="pt-1 text-lg font-semibold text-slate-900">
-                  HỘP THƯ CỦA BẠN
+                  HỘP THƯ ĐẾN
                 </h2>
                 {selectedEmailIds.length > 0 && (
                   <div className="flex items-center space-x-2 mt-1">
@@ -781,25 +750,11 @@ export default function WorkspacePage() {
                     title="Tạo câu trả lời với AI"
                   >
                     {isGeneratingAi ? (
-                      <svg
-                        className="animate-spin h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
+                      <LoadingSpinner
+                        className="h-5 w-5"
+                        trackClassName="text-white/35"
+                        arcClassName="text-white"
+                      />
                     ) : (
                       <>
                         <svg
@@ -828,7 +783,7 @@ export default function WorkspacePage() {
           <div className="flex-1 overflow-hidden">
             {isLoading ? (
               <div className="h-full flex items-center justify-center">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <LoadingSpinner className="h-8 w-8" />
               </div>
             ) : error ? (
               <div className="h-full flex items-center justify-center p-4">
@@ -869,25 +824,7 @@ export default function WorkspacePage() {
                 {isLoadingDetail ? (
                   <div className="h-full flex items-center justify-center">
                     <div className="text-center">
-                      <svg
-                        className="animate-spin h-12 w-12 mx-auto text-blue-600"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                      >
-                        <circle
-                          className="opacity-25"
-                          cx="12"
-                          cy="12"
-                          r="10"
-                          stroke="currentColor"
-                          strokeWidth="4"
-                        ></circle>
-                        <path
-                          className="opacity-75"
-                          fill="currentColor"
-                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                        ></path>
-                      </svg>
+                      <LoadingSpinner className="mx-auto h-12 w-12" />
                       <p className="mt-4 text-sm text-slate-600">
                         Đang tải nội dung email...
                       </p>

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation"; //điều hướng chuyển trang
 import Image from "next/image";
 import { getAuthToken } from "@/services/api";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function LandingPage() {
   const router = useRouter();
@@ -107,7 +108,7 @@ export default function LandingPage() {
             className="mx-auto bg-white/90 backdrop-blur-sm border border-white/30 rounded-lg py-4 w-[90%] text-gray-800 font-medium hover:bg-[#faf5f5] focus:outline-none focus:ring-2 focus:ring-gray-50 focus:ring-offset-2 transition duration-200 flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-md shadow-blue-200 hover:shadow-xl hover:-translate-y-1 ]"
           >
             {isLoading ? (
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+              <LoadingSpinner className="h-6 w-6" />
             ) : (
               <>
                 <svg
