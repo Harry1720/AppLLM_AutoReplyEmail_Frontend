@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
@@ -9,6 +9,7 @@ import AiSuggestionPanel from "@/components/AiSuggestionPanel";
 import Header from "@/components/Header";
 import FloatingAiButton from "@/components/FloatingAiButton";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import SearchBar from "@/components/SearchBar";
 
 // Import các hàm gọi API (Service)
 import {
@@ -44,6 +45,8 @@ export default function WorkspacePage() {
 
   // AI Panel visibility state
   const [isAiPanelVisible, setIsAiPanelVisible] = useState(true); // Quản lý hiển thị/ẩn panel AI
+  const [searchTerm, setSearchTerm] = useState("");
+  const [timeFilter, setTimeFilter] = useState<string>("all");
 
   // HÀM TẢI EMAIL
   // Sử dụng useCallback để tránh re-create function
@@ -597,35 +600,86 @@ export default function WorkspacePage() {
               </div>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-hidden">
-              {isLoading ? (
-                <div className="flex h-full items-center justify-center">
-                  <LoadingSpinner className="h-8 w-8" />
-                </div>
-              ) : error ? (
-                <div className="flex h-full items-center justify-center p-4">
-                  <div className="text-center">
-                    <p className="mb-2 text-red-600">{error}</p>
-                    <button
-                      onClick={() => loadEmails()}
-                      className="text-blue-600 hover:underline"
-                    >
-                      Thử lại
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <EmailList
-                  emails={emails}
-                  selectedEmail={selectedEmail}
-                  onEmailSelect={handleEmailSelect}
-                  selectedEmailIds={selectedEmailIds}
-                  onEmailCheckboxChange={handleEmailCheckboxChange}
-                  hasNextPage={!!nextPageToken}
-                  onLoadMore={handleLoadMore}
-                  isLoadingMore={isLoadingMore}
+            <div className="min-h-0 flex-1 flex flex-col overflow-hidden">
+              <div className="px-4 pb-2 shrink-0">
+                <SearchBar
+                  value={searchTerm}
+                  onChange={setSearchTerm}
+                  timeFilter={timeFilter}
+                  onTimeFilterChange={setTimeFilter}
                 />
-              )}
+              </div>
+
+              <div className="flex-1 min-h-0 overflow-hidden">
+                {isLoading ? (
+                  <div className="flex h-full items-center justify-center">
+                    <LoadingSpinner className="h-8 w-8" />
+                  </div>
+                ) : error ? (
+                  <div className="flex h-full items-center justify-center p-4">
+                    <div className="text-center">
+                      <p className="mb-2 text-red-600">{error}</p>
+                      <button
+                        onClick={() => loadEmails()}
+                        className="text-blue-600 hover:underline"
+                      >
+                        Thử lại
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <EmailList
+                    emails={(() => {
+                      const term = searchTerm.trim().toLowerCase();
+                      const now = new Date();
+                      return emails.filter((email) => {
+                        if (timeFilter !== "all") {
+                          const ts = new Date(email.timestamp);
+                          const diffDays = Math.floor(
+                            (now.getTime() - ts.getTime()) /
+                              (1000 * 60 * 60 * 24),
+                          );
+                          if (timeFilter === "today") {
+                            if (
+                              ts.getFullYear() !== now.getFullYear() ||
+                              ts.getMonth() !== now.getMonth() ||
+                              ts.getDate() !== now.getDate()
+                            )
+                              return false;
+                          } else if (timeFilter === "7") {
+                            if (diffDays > 7) return false;
+                          } else if (timeFilter === "30") {
+                            if (diffDays > 30) return false;
+                          }
+                        }
+
+                        if (!term) return true;
+
+                        const haystack = (
+                          (email.sender || "") +
+                          " " +
+                          (email.senderEmail || "") +
+                          " " +
+                          (email.subject || "") +
+                          " " +
+                          (email.snippet || "") +
+                          " " +
+                          (email.body || "")
+                        ).toLowerCase();
+
+                        return haystack.includes(term);
+                      });
+                    })()}
+                    selectedEmail={selectedEmail}
+                    onEmailSelect={handleEmailSelect}
+                    selectedEmailIds={selectedEmailIds}
+                    onEmailCheckboxChange={handleEmailCheckboxChange}
+                    hasNextPage={!!nextPageToken}
+                    onLoadMore={handleLoadMore}
+                    isLoadingMore={isLoadingMore}
+                  />
+                )}
+              </div>
             </div>
           </div>
 
@@ -780,26 +834,75 @@ export default function WorkspacePage() {
               </div>
             </div>
           </div>
-          <div className="flex-1 overflow-hidden">
-            {isLoading ? (
-              <div className="h-full flex items-center justify-center">
-                <LoadingSpinner className="h-8 w-8" />
-              </div>
-            ) : error ? (
-              <div className="h-full flex items-center justify-center p-4">
-                <div className="text-center">
-                  <p className="mb-2 text-red-600">{error}</p>
-                  <button
-                    onClick={() => loadEmails()}
-                    className="text-blue-600 hover:underline"
-                  >
-                    Thử lại
-                  </button>
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <div className="px-4 pb-2 shrink-0">
+              <SearchBar
+                value={searchTerm}
+                onChange={setSearchTerm}
+                timeFilter={timeFilter}
+                onTimeFilterChange={setTimeFilter}
+              />
+            </div>
+
+            <div className="flex-1 min-h-0 overflow-hidden">
+              {isLoading ? (
+                <div className="h-full flex items-center justify-center">
+                  <LoadingSpinner className="h-8 w-8" />
                 </div>
-              </div>
-            ) : (
-              <EmailList
-                emails={emails}
+              ) : error ? (
+                <div className="h-full flex items-center justify-center p-4">
+                  <div className="text-center">
+                    <p className="mb-2 text-red-600">{error}</p>
+                    <button
+                      onClick={() => loadEmails()}
+                      className="text-blue-600 hover:underline"
+                    >
+                      Thử lại
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <EmailList
+                emails={(() => {
+                  const term = searchTerm.trim().toLowerCase();
+                  const now = new Date();
+                  return emails.filter((email) => {
+                    if (timeFilter !== "all") {
+                      const ts = new Date(email.timestamp);
+                      const diffDays = Math.floor(
+                        (now.getTime() - ts.getTime()) / (1000 * 60 * 60 * 24),
+                      );
+                      if (timeFilter === "today") {
+                        if (
+                          ts.getFullYear() !== now.getFullYear() ||
+                          ts.getMonth() !== now.getMonth() ||
+                          ts.getDate() !== now.getDate()
+                        )
+                          return false;
+                      } else if (timeFilter === "7") {
+                        if (diffDays > 7) return false;
+                      } else if (timeFilter === "30") {
+                        if (diffDays > 30) return false;
+                      }
+                    }
+
+                    if (!term) return true;
+
+                    const haystack = (
+                      (email.sender || "") +
+                      " " +
+                      (email.senderEmail || "") +
+                      " " +
+                      (email.subject || "") +
+                      " " +
+                      (email.snippet || "") +
+                      " " +
+                      (email.body || "")
+                    ).toLowerCase();
+
+                    return haystack.includes(term);
+                  });
+                })()}
                 selectedEmail={selectedEmail}
                 onEmailSelect={handleEmailSelect}
                 selectedEmailIds={selectedEmailIds}
@@ -809,6 +912,7 @@ export default function WorkspacePage() {
                 isLoadingMore={isLoadingMore}
               />
             )}
+            </div>
           </div>
         </div>
 
