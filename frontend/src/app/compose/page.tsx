@@ -8,6 +8,7 @@ import EmailComposer from "@/components/EmailComposer";
 import EmailDetail from "@/components/EmailDetail";
 import Header from "@/components/Header";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import SearchBar from "@/components/SearchBar";
 import {
   fetchSentEmails,
   fetchEmailDetail,
@@ -34,6 +35,53 @@ export default function ComposePage() {
   // true -> Hiện khung soạn thảo (EmailComposer)
   // false -> Hiện nội dung email (EmailDetail) hoặc màn hình chờ
   const [showComposer, setShowComposer] = useState(false);
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [timeFilter, setTimeFilter] = useState<string>("all");
+
+  const getFilteredEmails = (sourceEmails: Email[]) => {
+    const term = searchTerm.trim().toLowerCase();
+    const now = new Date();
+
+    return sourceEmails.filter((email) => {
+      if (timeFilter !== "all") {
+        const ts = new Date(email.timestamp);
+        const diffDays = Math.floor(
+          (now.getTime() - ts.getTime()) / (1000 * 60 * 60 * 24),
+        );
+
+        if (timeFilter === "today") {
+          if (
+            ts.getFullYear() !== now.getFullYear() ||
+            ts.getMonth() !== now.getMonth() ||
+            ts.getDate() !== now.getDate()
+          ) {
+            return false;
+          }
+        } else if (timeFilter === "7") {
+          if (diffDays > 7) return false;
+        } else if (timeFilter === "30") {
+          if (diffDays > 30) return false;
+        }
+      }
+
+      if (!term) return true;
+
+      const haystack = (
+        (email.sender || "") +
+        " " +
+        (email.senderEmail || "") +
+        " " +
+        (email.subject || "") +
+        " " +
+        (email.snippet || "") +
+        " " +
+        (email.body || "")
+      ).toLowerCase();
+
+      return haystack.includes(term);
+    });
+  };
 
   // Check authentication on mount
   useEffect(() => {
@@ -147,11 +195,16 @@ export default function ComposePage() {
         // Backend có thể trả về nextPageToken hoặc next_page_token
         setNextPageToken(data.nextPageToken || data.next_page_token || null);
         // console.log('Next page token:', data.nextPageToken || data.next_page_token);
-      } catch (error: any) {
+      } catch (error: unknown) {
         console.error("Error loading sent emails:", error);
-        setError(error.message || "Failed to load sent emails");
+        setError(
+          error instanceof Error ? error.message : "Failed to load sent emails",
+        );
 
-        if (error.message.includes("Authentication expired")) {
+        if (
+          error instanceof Error &&
+          error.message.includes("Authentication expired")
+        ) {
           router.push("/");
         }
       } finally {
@@ -196,9 +249,11 @@ export default function ComposePage() {
         body: emailData.body || emailData.snippet || "",
         attachments: emailData.attachments || [],
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error loading email detail:", error);
-      setError(error.message || "Failed to load email detail");
+      setError(
+        error instanceof Error ? error.message : "Failed to load email detail",
+      );
     } finally {
       setIsLoadingDetail(false); // Tắt loading spinner
     }
@@ -234,7 +289,7 @@ export default function ComposePage() {
       setShowComposer(false);
 
       return { success: true };
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error sending email:", error);
       throw error;
     }
@@ -268,7 +323,8 @@ export default function ComposePage() {
           Hộp thư đã gửi & Soạn thư mới
         </h3>
         <p className="mt-3 text-sm leading-6 text-slate-600">
-          Xem nội dung đã gửi hoặc soạn thêm thư mới để AI hiểu phong cách của bạn hơn.
+          Xem nội dung đã gửi hoặc soạn thêm thư mới để AI hiểu phong cách của
+          bạn hơn.
         </p>
       </div>
     </div>
@@ -315,33 +371,44 @@ export default function ComposePage() {
               </div>
             </div>
 
-            <div className="min-h-0 flex-1 overflow-hidden">
-              {isLoading ? (
-                <div className="flex h-full items-center justify-center">
-                  <LoadingSpinner className="h-8 w-8" />
-                </div>
-              ) : error ? (
-                <div className="flex h-full items-center justify-center p-4">
-                  <div className="text-center">
-                    <p className="mb-2 text-red-600">{error}</p>
-                    <button
-                      onClick={() => loadSentEmails()}
-                      className="text-blue-600 hover:underline"
-                    >
-                      Thử lại
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <EmailList
-                  emails={emails}
-                  selectedEmail={showComposer ? null : selectedEmail}
-                  onEmailSelect={handleEmailSelect}
-                  onLoadMore={handleLoadMore}
-                  hasNextPage={!!nextPageToken}
-                  isLoadingMore={isLoadingMore}
+            <div className="min-h-0 flex-1 flex flex-col overflow-hidden">
+              <div className="px-4 pb-2 shrink-0">
+                <SearchBar
+                  value={searchTerm}
+                  onChange={setSearchTerm}
+                  timeFilter={timeFilter}
+                  onTimeFilterChange={setTimeFilter}
                 />
-              )}
+              </div>
+
+              <div className="flex-1 min-h-0 overflow-hidden">
+                {isLoading ? (
+                  <div className="flex h-full items-center justify-center">
+                    <LoadingSpinner className="h-8 w-8" />
+                  </div>
+                ) : error ? (
+                  <div className="flex h-full items-center justify-center p-4">
+                    <div className="text-center">
+                      <p className="mb-2 text-red-600">{error}</p>
+                      <button
+                        onClick={() => loadSentEmails()}
+                        className="text-blue-600 hover:underline"
+                      >
+                        Thử lại
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <EmailList
+                    emails={getFilteredEmails(emails)}
+                    selectedEmail={showComposer ? null : selectedEmail}
+                    onEmailSelect={handleEmailSelect}
+                    onLoadMore={handleLoadMore}
+                    hasNextPage={!!nextPageToken}
+                    isLoadingMore={isLoadingMore}
+                  />
+                )}
+              </div>
             </div>
           </div>
 
@@ -440,33 +507,44 @@ export default function ComposePage() {
               </div>
             </div>
           </div>
-          <div className="flex-1 overflow-hidden">
-            {isLoading ? (
-              <div className="h-full flex items-center justify-center">
-                <LoadingSpinner className="h-8 w-8" />
-              </div>
-            ) : error ? (
-              <div className="h-full flex items-center justify-center p-4">
-                <div className="text-center">
-                  <p className="mb-2 text-red-600">{error}</p>
-                  <button
-                    onClick={() => loadSentEmails()}
-                    className="text-blue-600 hover:underline"
-                  >
-                    Thử lại
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <EmailList
-                emails={emails}
-                selectedEmail={showComposer ? null : selectedEmail}
-                onEmailSelect={handleEmailSelect}
-                onLoadMore={handleLoadMore}
-                hasNextPage={!!nextPageToken}
-                isLoadingMore={isLoadingMore}
+          <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+            <div className="px-4 pb-2 shrink-0">
+              <SearchBar
+                value={searchTerm}
+                onChange={setSearchTerm}
+                timeFilter={timeFilter}
+                onTimeFilterChange={setTimeFilter}
               />
-            )}
+            </div>
+
+            <div className="flex-1 min-h-0 overflow-hidden">
+              {isLoading ? (
+                <div className="h-full flex items-center justify-center">
+                  <LoadingSpinner className="h-8 w-8" />
+                </div>
+              ) : error ? (
+                <div className="h-full flex items-center justify-center p-4">
+                  <div className="text-center">
+                    <p className="mb-2 text-red-600">{error}</p>
+                    <button
+                      onClick={() => loadSentEmails()}
+                      className="text-blue-600 hover:underline"
+                    >
+                      Thử lại
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <EmailList
+                  emails={getFilteredEmails(emails)}
+                  selectedEmail={showComposer ? null : selectedEmail}
+                  onEmailSelect={handleEmailSelect}
+                  onLoadMore={handleLoadMore}
+                  hasNextPage={!!nextPageToken}
+                  isLoadingMore={isLoadingMore}
+                />
+              )}
+            </div>
           </div>
         </div>
 
