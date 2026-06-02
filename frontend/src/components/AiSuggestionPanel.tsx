@@ -2,14 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Email } from "@/types/email";
-import {
-  sendDraft,
-  updateDraft,
-  deleteDraft,
-  getDraftDetail,
-} from "@/services/api";
+import { sendDraft, deleteDraft, getDraftDetail } from "@/services/api";
 import { useToast } from "./ToastContainer";
 import { useConfirm } from "./ConfirmDialogContainer";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface AiSuggestionPanelProps {
   email: Email;
@@ -287,7 +283,9 @@ export default function AiSuggestionPanel({
               AI ASSISTANT
             </p>
 
-            <h2 className=" pt-1 text-lg font-semibold text-gray-900">GỢI Ý TỪ AI</h2>
+            <h2 className=" pt-1 text-lg font-semibold text-gray-900">
+              GỢI Ý TỪ AI
+            </h2>
           </div>
 
           {/* Nút đóng panel */}
@@ -354,25 +352,7 @@ export default function AiSuggestionPanel({
         ) : isLoadingDraft ? (
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
-              <svg
-                className="animate-spin h-8 w-8 text-blue-500 mx-auto mb-2"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <circle
-                  className="opacity-25"
-                  cx="12"
-                  cy="12"
-                  r="10"
-                  stroke="currentColor"
-                  strokeWidth="4"
-                ></circle>
-                <path
-                  className="opacity-75"
-                  fill="currentColor"
-                  d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                ></path>
-              </svg>
+              <LoadingSpinner className="mx-auto mb-2 h-8 w-8" />
               <p className="text-sm text-gray-500 font-medium">
                 {email.draftId ? "Đang tải..." : "Đang tạo câu trả lời..."}
               </p>
@@ -437,26 +417,11 @@ export default function AiSuggestionPanel({
               >
                 {isSending ? (
                   <>
-                    <svg
-                      className="animate-spin h-5 w-5 text-blue-600"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                      ></path>
-                    </svg>
+                    <LoadingSpinner
+                      className="h-5 w-5"
+                      trackClassName="text-blue-200"
+                      arcClassName="text-blue-600"
+                    />
                     <span>Đang gửi...</span>
                   </>
                 ) : (

@@ -8,6 +8,7 @@ import {
   syncAiData,
   checkSyncStatus,
 } from "@/services/api";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 export default function AuthCallbackPage() {
   const router = useRouter();
@@ -50,23 +51,23 @@ export default function AuthCallbackPage() {
 
       try {
         // Exchange code for token
-        setSyncMessage("Đang xác thực...");
+        setSyncMessage("Đang xác thực tài khoản...");
         const data = await exchangeCodeForToken(code); // Gọi API gửi code lên server, server sẽ trả về Token đăng nhập
 
         console.log("Login successful:", data);
 
         // Check if sync is needed
-        setSyncMessage("Kiểm tra ngữ cảnh..."); // Đổi thông báo
+        setSyncMessage("Đang chuẩn bị không gian làm việc..."); // Đổi thông báo
         const syncStatus = await checkSyncStatus(); // Hỏi server xem user này đã đồng bộ dữ liệu AI chưa
 
         if (!syncStatus.synced) {
           // Nếu server trả về là chưa đồng bộ
           // Chỉ khởi tạo sync một lần rồi chuyển sang workspace để tránh polling dày trên UI
-          setSyncMessage("Đang khởi tạo xử lý ngữ cảnh từ email đã gửi...");
+          setSyncMessage("Đang khởi tạo xử lý dữ liệu từ email đã gửi...");
           await syncAiData(); //gọi Server bắt đầu quá trình đọc email (Vector embedding)
 
           setSyncMessage(
-            "Bắt đầu xử lý ngữ cảnh ở nền. Đang chuyển vào workspace...",
+            "Bắt đầu xử lý dữ liệu ở nền. Đang chuyển vào workspace...",
           );
         } else {
           setSyncMessage(`✅ Đã có ngữ cảnh`);
@@ -96,8 +97,8 @@ export default function AuthCallbackPage() {
   }, [searchParams, router]); // useEffect sẽ chạy lại nếu searchParams hoặc router thay đổi (thực tế chỉ chạy 1 lần khi load trang)
 
   return (
-    <div className="min-h-screen relative flex items-center justify-center px-4">
-      {/* Background image with overlay */}
+    <div className="relative min-h-screen overflow-hidden px-4 py-8 flex items-center justify-center">
+      {/* Background image with softer overlay */}
       <div className="absolute inset-0 z-0">
         <Image
           src="/context.png"
@@ -106,59 +107,71 @@ export default function AuthCallbackPage() {
           className="object-cover"
           priority
         />
-        <div className="absolute inset-0 bg-white/30"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(247,251,255,0.40)_0%,rgba(237,244,255,0.62)_100%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.28),transparent_40%),radial-gradient(circle_at_bottom,rgba(88,129,255,0.10),transparent_52%)]" />
+        <div className="absolute inset-0 bg-slate-900/10" />
       </div>
 
-      <div className="max-w-md w-full bg-white/90 backdrop-blur-sm rounded-lg shadow-lg p-8 text-center relative z-10">
-        {isProcessing ? (
-          <>
-            <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-blue-500 mx-auto mb-4"></div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              {syncMessage.includes("✅") ? "Hoàn tất!" : "Đang xử lý..."}
-              {/* Nếu tiến trình đồng bộ thành công thì hiển thị Hoàn tất */}
-            </h2>
-            <p className="text-gray-600">{syncMessage}</p>
-            {syncMessage.includes("Đang xử lý lấy ngữ cảnh") && (
-              <div className="mt-4">
-                <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div
-                    className="bg-blue-500 h-2 rounded-full animate-pulse"
-                    style={{ width: "60%" }}
-                  ></div>
+      <div className="relative z-10 w-full max-w-md overflow-hidden rounded-3xl border border-white/25 bg-white/14 p-8 text-center shadow-[0_8px_40px_rgba(30,60,120,0.55)] backdrop-blur-[18px] ring-1 ring-white/10">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.92)_0%,rgba(255,255,255,0.54)_50%,rgba(255,255,255,0.40)_100%)]" />
+        <div className="relative">
+          {isProcessing ? (
+            <>
+              <LoadingSpinner className="mx-auto mb-5 h-24 w-24" />
+              <p className="mb-3 text-[14px] font-semibold uppercase tracking-[0.28em] text-blue-500/80">
+                Xác thực tài khoản
+              </p>
+              <h2 className="mb-3 text-2xl font-semibold tracking-[-0.03em] text-slate-900 sm:text-[2rem]">
+                {syncMessage.includes("✅") ? "Hoàn tất!" : "Đang xử lý..."}
+                {/* Nếu tiến trình đồng bộ thành công thì hiển thị Hoàn tất */}
+              </h2>
+              <p className="text-sm leading-6 text-slate-700/85 sm:text-base">
+                {syncMessage}
+              </p>
+              {syncMessage.includes("Đang xử lý lấy ngữ cảnh") && (
+                <div className="mt-5">
+                  <div className="h-2 w-full rounded-full bg-slate-200/70">
+                    <div
+                      className="h-2 rounded-full bg-linear-to-r from-sky-500 to-blue-500 animate-pulse"
+                      style={{ width: "60%" }}
+                    ></div>
+                  </div>
+                  <p className="mt-2 text-xs leading-5 text-slate-600/80">
+                    Hệ thống đang phân tích email đã gửi để cải thiện chất lượng
+                    gợi ý AI. Vui lòng đợi một lát.
+                  </p>
                 </div>
-                <p className="text-xs text-gray-500 mt-2">
-                  Hệ thống đang phân tích email đã gửi để cải thiện chất lượng
-                  gợi ý AI. Vui lòng đợi một lát.
-                </p>
+              )}
+            </>
+          ) : error ? (
+            <>
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100/80">
+                <svg
+                  className="h-8 w-8 text-red-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
               </div>
-            )}
-          </>
-        ) : error ? (
-          <>
-            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg
-                className="w-8 h-8 text-red-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </div>
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Lỗi xác thực
-            </h2>
-            <p className="text-red-600 mb-4">{error}</p>
-            <p className="text-sm text-gray-500">
-              Đang chuyển hướng về trang chủ...
-            </p>
-          </>
-        ) : null}
+              <h2 className="mb-2 text-2xl font-semibold tracking-[-0.03em] text-red-800">
+                Lỗi xác thực
+              </h2>
+              <p className="mb-4 text-sm leading-6 text-red-400 sm:text-base">
+                {error}
+              </p>
+              <p className="text-sm text-slate-600/80">
+                Đang chuyển hướng về trang đăng nhập...
+              </p>
+            </>
+          ) : null}
+        </div>
       </div>
     </div>
   );

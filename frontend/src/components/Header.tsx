@@ -6,6 +6,7 @@ import { fetchUserProfile, logout, getAuthToken } from "@/services/api";
 import Image from "next/image";
 import { createPortal } from "react-dom";
 import { useConfirm } from "./ConfirmDialogContainer";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 interface HeaderProps {
   onSync?: () => Promise<void>;
@@ -73,7 +74,7 @@ export default function Header({ onSync, isSyncing = false }: HeaderProps) {
       message: "Bạn có chắc chắn muốn đăng xuất?",
       confirmText: "Đăng xuất",
       cancelText: "Hủy",
-      type: "warning",
+      type: "danger",
     });
 
     if (confirmed) {
@@ -228,19 +229,23 @@ export default function Header({ onSync, isSyncing = false }: HeaderProps) {
               className="cursor-pointer rounded-xl border border-white/60 bg-white/65 p-3 text-slate-500 shadow-sm transition-all hover:-translate-y-0.5 hover:text-slate-700 hover:shadow-[0_8px_20px_rgba(93,141,255,0.10)] disabled:cursor-not-allowed disabled:opacity-50"
               title={isSyncing ? "Đang đồng bộ..." : "Đồng bộ email"}
             >
-              <svg
-                className={`w-5 h-5 ${isSyncing ? "animate-spin" : ""}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                />
-              </svg>
+              {isSyncing ? (
+                <LoadingSpinner className="h-5 w-5" />
+              ) : (
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+              )}
             </button>
           )}
 
@@ -446,11 +451,11 @@ export default function Header({ onSync, isSyncing = false }: HeaderProps) {
             >
               <div className="overflow-hidden rounded-2xl border border-white/70 bg-white/95 shadow-[0_20px_50px_rgba(15,23,42,0.16)] backdrop-blur-xl">
                 <div className="border-b border-slate-100 px-4 py-3">
-                  <p className="text-sm font-semibold text-slate-900">
+                  <p className="text-sm font-semibold text-slate-900 mb-1">
                     Điều hướng
                   </p>
                   <p className="text-xs text-slate-500">
-                    Chọn tác vụ bạn muốn dùng
+                    Hãy chọn tác vụ bạn muốn sử dụng
                   </p>
                 </div>
                 <div className="p-2">
@@ -459,10 +464,10 @@ export default function Header({ onSync, isSyncing = false }: HeaderProps) {
                       setShowMobileMenu(false);
                       router.push("/workspace");
                     }}
-                    className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-colors cursor-pointer ${
+                    className={`flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-colors cursor-pointer my-1 ${
                       pathname === "/workspace"
-                        ? "bg-linear-to-r from-blue-600 to-indigo-500 text-white shadow-[0_0px_24px_rgba(93,141,255,0.9)] hover:-translate-y-0.5 transition-all"
-                        : "text-slate-700 hover:bg-blue-50 hover:text-slate-900"
+                        ? "bg-linear-to-r from-blue-600 to-indigo-500 text-white shadow-[0_0px_24px_rgba(93,141,255,0.3)] hover:-translate-y-0.5 transition-all"
+                        : "text-slate-700 hover:bg-blue-50 hover:text-slate-900 hover:-translate-y-0.5 "
                     }`}
                   >
                     <svg
@@ -486,10 +491,10 @@ export default function Header({ onSync, isSyncing = false }: HeaderProps) {
                       setShowMobileMenu(false);
                       router.push("/compose");
                     }}
-                    className={`mt-1 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-colors cursor-pointer ${
+                    className={`mt-1 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-left text-sm font-medium transition-colors cursor-pointer my-1 ${
                       pathname === "/compose"
-                        ? "bg-linear-to-r from-blue-600 to-indigo-500 text-white shadow-[0_0px_24px_rgba(93,141,255,0.9)] hover:-translate-y-0.5 transition-all"
-                        : "text-slate-700 hover:bg-blue-50 hover:text-slate-900"
+                        ? "bg-linear-to-r from-blue-600 to-indigo-500 text-white shadow-[0_0px_24px_rgba(93,141,255,0.3)] hover:-translate-y-0.5 transition-all"
+                        : "text-slate-700 hover:bg-blue-50 hover:text-slate-900 hover:-translate-y-0.5 "
                     }`}
                   >
                     <svg

@@ -104,7 +104,7 @@ export default function SettingsPage() {
       message: 'Bạn có chắc chắn muốn đăng xuất?',
       confirmText: 'Đăng xuất',
       cancelText: 'Hủy',
-      type: 'warning'
+      type: 'danger'
     });
 
     if (confirmed) {
@@ -127,13 +127,13 @@ export default function SettingsPage() {
   return (
     <div className="h-screen overflow-hidden">
       {/* Header với background riêng */}
-      <div className="relative z-20 bg-white">
+      <div className="relative z-20">
         <Header />
       </div>
 
       {/* Background Image cho phần content */}
       <div className="h-full relative overflow-hidden">
-        <div className="absolute inset-0 z-0">
+        {/* <div className="absolute inset-0 z-0">
           <Image
             src="/login.png"
             alt="Background"
@@ -141,7 +141,7 @@ export default function SettingsPage() {
             className="object-cover opacity-40"
             priority
           />
-        </div>
+        </div> */}
 
         {/* Content */}
         <div className="relative z-10 h-full overflow-y-auto">
