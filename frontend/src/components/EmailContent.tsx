@@ -148,6 +148,7 @@ export default function EmailContent({ email }: EmailContentProps) {
             </div>
           </div>
         </div>
+        <i>(Ứng dụng hiện chưa hỗ trợ hiển thị tệp đính kèm email, nếu có)</i>
       </div>
 
       {/* Email Body */}

@@ -1,9 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { useToast } from "./ToastContainer";
 import { useConfirm } from "./ConfirmDialogContainer";
 import LoadingSpinner from "@/components/LoadingSpinner";
+
+const ReactQuill = dynamic(() => import("react-quill-new"), {
+  ssr: false,
+  loading: () => <div className="h-[300px] flex items-center justify-center bg-gray-50 border border-gray-200 rounded"><LoadingSpinner /></div>,
+});
+// @ts-expect-error - CSS import for react-quill-new does not have type declarations
+import "react-quill-new/dist/quill.snow.css";
 
 interface EmailComposerProps {
   onSend: (
@@ -28,8 +36,6 @@ export default function EmailComposer({ onSend }: EmailComposerProps) {
   const [body, setBody] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const [isSending, setIsSending] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   // Load draft from localStorage on mount
   useEffect(() => {
@@ -65,13 +71,11 @@ export default function EmailComposer({ onSend }: EmailComposerProps) {
   const handleSend = async () => {
     // Validate
     if (!to.trim()) {
-      setError("Vui lòng nhập địa chỉ email người nhận");
       showToast("Vui lòng nhập địa chỉ email người nhận", "warning");
       return;
     }
 
     if (!body.trim()) {
-      setError("Vui lòng nhập nội dung email");
       showToast("Vui lòng nhập nội dung email", "warning");
       return;
     }
@@ -79,7 +83,6 @@ export default function EmailComposer({ onSend }: EmailComposerProps) {
     // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(to.trim())) {
-      setError("Địa chỉ email không hợp lệ");
       showToast("Địa chỉ email không hợp lệ", "error");
       return;
     }
@@ -98,7 +101,6 @@ export default function EmailComposer({ onSend }: EmailComposerProps) {
     }
 
     setIsSending(true);
-    setError(null);
 
     try {
       await onSend(
@@ -114,11 +116,10 @@ export default function EmailComposer({ onSend }: EmailComposerProps) {
       setBody("");
       setFiles([]);
 
-      // Show success message
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
-    } catch (err: any) {
-      setError(err.message || "Không thể gửi email. Vui lòng thử lại.");
+      showToast("Đã gửi email thành công!", "success");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Không thể gửi email. Vui lòng thử lại.";
+      showToast(errorMessage, "error");
     } finally {
       setIsSending(false);
     }
@@ -178,25 +179,34 @@ export default function EmailComposer({ onSend }: EmailComposerProps) {
           </div>
 
           {/* Body Field */}
-          <div>
+          <div className="flex flex-col h-[500px]">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nội dung <span className="text-red-500">*</span>
+              Nội dung <span className="text-red-500">* </span> <i>(Vui lòng sử dụng phần Đính kèm tệp bên dưới)</i>
             </label>
-            <textarea
-              value={body}
-              onChange={(e) => setBody(e.target.value)}
-              placeholder="Nhập nội dung email..."
-              rows={15}
-              disabled={isSending}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none disabled:bg-gray-100 disabled:cursor-not-allowed"
-            />
+            <div className={`flex-1 flex flex-col ${isSending ? "opacity-60 pointer-events-none" : ""}`}>
+              <ReactQuill
+                theme="snow"
+                value={body}
+                onChange={setBody}
+                placeholder="Nhập nội dung email..."
+                className="bg-white flex-1 flex flex-col [&_.ql-container]:flex-1 [&_.ql-container]:overflow-y-auto [&_.ql-editor]:min-h-[300px]"
+                modules={{
+                  toolbar: [
+                    [{ header: [1, 2, 3, false] }],
+                    ["bold", "italic", "underline", "strike"],
+                    [{ list: "ordered" }, { list: "bullet" }],
+                    ["link", "image"],
+                    ["clean"],
+                  ],
+                }}
+              />
+            </div>
           </div>
 
           {/* File Attachments */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Đính kèm tệp (Muốn gửi nhiều tệp thì chọn nhiều tệp từ máy trong
-              một lần)
+              Đính kèm tệp <i>(Ứng dụng chỉ hiện hỗ trợ gửi 1 tệp)</i>
             </label>
             <input
               type="file"

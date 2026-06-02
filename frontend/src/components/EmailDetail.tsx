@@ -92,8 +92,7 @@ export default function EmailDetail({ email }: EmailDetailProps) {
               <h3 className="text-sm font-medium text-gray-900 mb-3">
                 Tệp đính kèm ({email.attachments.length}) <br />
                 <br />
-                (Ứng dụng không hỗ trợ xem/tải tệp đính kèm. Vui lòng thực hiện
-                ở Gmail)
+                <i>(Ứng dụng không hỗ trợ xem/tải tệp đính kèm)</i>
               </h3>
               <div className="space-y-2">
                 {email.attachments.map((attachment, index) => (
