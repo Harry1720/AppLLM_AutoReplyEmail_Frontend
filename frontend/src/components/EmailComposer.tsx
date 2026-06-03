@@ -14,7 +14,7 @@ const ReactQuill = dynamic(() => import("react-quill-new"), {
     </div>
   ),
 });
-// @ts-expect-error - CSS import for react-quill-new does not have type declarations
+// CSS import for react-quill-new does not have type declarations
 import "react-quill-new/dist/quill.snow.css";
 
 interface EmailComposerProps {
