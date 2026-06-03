@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation"; // Dùng để đọc dữ liệu trên thanh địa chỉ (URL)
 import Image from "next/image";
 import {
@@ -10,7 +10,7 @@ import {
 } from "@/services/api";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
-export default function AuthCallbackPage() {
+function AuthCallbackLogic() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
@@ -174,5 +174,13 @@ export default function AuthCallbackPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense fallback={<div>Đang tải thông tin xác thực...</div>}>
+      <AuthCallbackLogic />
+    </Suspense>
   );
 }
