@@ -8,7 +8,11 @@ import LoadingSpinner from "@/components/LoadingSpinner";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), {
   ssr: false,
-  loading: () => <div className="h-[300px] flex items-center justify-center bg-gray-50 border border-gray-200 rounded"><LoadingSpinner /></div>,
+  loading: () => (
+    <div className="h-[300px] flex items-center justify-center bg-gray-50 border border-gray-200 rounded">
+      <LoadingSpinner />
+    </div>
+  ),
 });
 // @ts-expect-error - CSS import for react-quill-new does not have type declarations
 import "react-quill-new/dist/quill.snow.css";
@@ -118,7 +122,10 @@ export default function EmailComposer({ onSend }: EmailComposerProps) {
 
       showToast("Đã gửi email thành công!", "success");
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : "Không thể gửi email. Vui lòng thử lại.";
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Không thể gửi email. Vui lòng thử lại.";
       showToast(errorMessage, "error");
     } finally {
       setIsSending(false);
@@ -141,8 +148,11 @@ export default function EmailComposer({ onSend }: EmailComposerProps) {
       )}
 
       {/* Header */}
-      <div className="p-4 border-b border-gray-200">
-        <h2 className="text-lg font-semibold text-gray-900">Soạn email mới</h2>
+      <div className="p-4 pb-2 border-b border-gray-200 hidden 2xl:block">
+        <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-blue-500/80">
+          COMPOSE
+        </p>
+        <h2 className="text-lg font-semibold text-gray-900">SOẠN THƯ MỚI</h2>
       </div>
 
       {/* Form */}
@@ -181,9 +191,12 @@ export default function EmailComposer({ onSend }: EmailComposerProps) {
           {/* Body Field */}
           <div className="flex flex-col h-[500px]">
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Nội dung <span className="text-red-500">* </span> <i>(Vui lòng sử dụng phần Đính kèm tệp bên dưới)</i>
+              Nội dung <span className="text-red-500">* </span>{" "}
+              <i>(Vui lòng sử dụng phần Đính kèm tệp bên dưới)</i>
             </label>
-            <div className={`flex-1 flex flex-col ${isSending ? "opacity-60 pointer-events-none" : ""}`}>
+            <div
+              className={`flex-1 flex flex-col ${isSending ? "opacity-60 pointer-events-none" : ""}`}
+            >
               <ReactQuill
                 theme="snow"
                 value={body}

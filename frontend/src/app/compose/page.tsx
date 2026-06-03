@@ -337,7 +337,7 @@ export default function ComposePage() {
 
         <div className="relative flex min-h-0 flex-1 flex-col">
           <div className="mx-4 my-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[18px] border border-white/70 bg-white/60 backdrop-blur-xl">
-            <div className="shrink-0 border-b border-white/70 p-5">
+            <div className="shrink-0 border-b border-gray-200 p-5 pb-2">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-blue-500/80">
@@ -372,7 +372,7 @@ export default function ComposePage() {
             </div>
 
             <div className="min-h-0 flex-1 flex flex-col overflow-hidden">
-              <div className="px-4 pb-2 shrink-0">
+              <div className="p-4 shrink-0">
                 <SearchBar
                   value={searchTerm}
                   onChange={setSearchTerm}
@@ -414,7 +414,7 @@ export default function ComposePage() {
 
           {(selectedEmail || showComposer) && (
             <div className="absolute inset-x-4 top-4 bottom-4 z-20 flex min-h-0 flex-col overflow-hidden rounded-[18px] border border-white/70 bg-white/90 shadow-[0_18px_60px_rgba(93,141,255,0.14)] backdrop-blur-xl">
-              <div className="flex items-center justify-between border-b border-white/70 px-4 py-3">
+              <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
                 <div className="min-w-0">
                   <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-blue-500/80">
                     {selectedEmail ? "DETAIL" : "COMPOSE"}
@@ -474,7 +474,7 @@ export default function ComposePage() {
 
       <div className="hidden h-screen bg-transparent text-slate-900 2xl:flex">
         <div className="w-90 mx-4 my-4 flex flex-col overflow-hidden rounded-[18px] border border-white/70 bg-white/60 backdrop-blur-xl">
-          <div className="shrink-0 border-b border-white/70 p-5">
+          <div className="shrink-0 border-b border-gray-200 p-5 pb-3">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-[11px] font-medium uppercase tracking-[0.24em] text-blue-500/80">
@@ -508,7 +508,7 @@ export default function ComposePage() {
             </div>
           </div>
           <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
-            <div className="px-4 pb-2 shrink-0">
+            <div className="p-4 shrink-0">
               <SearchBar
                 value={searchTerm}
                 onChange={setSearchTerm}
