@@ -43,14 +43,20 @@ Dự án được xây dựng với các công nghệ web hiện đại nhất:
 
 ## 3. Một số hình ảnh giao diện
 
-<div style="display: grid, grid-template-columns: 1fr 1fr">
-    <img src="/frontend/UI_IMG/login.png" />
-    <img src="/frontend/UI_IMG/auth.png" />
-    <img src="/frontend/UI_IMG/inbox_and_detail_email.png" />
-    <img src="/frontend/UI_IMG/inbox_select_email.png" />
-    <img src="/frontend/UI_IMG/compose.png" />
-    <img src="/frontend/UI_IMG/setting.png" />
-</div>
+<table>
+  <tr>
+    <td><img src="./frontend/UI_IMG/login.png" width="400"></td>
+    <td><img src="./frontend/UI_IMG/auth.png" width="400"></td>
+  </tr>
+  <tr>
+    <td><img src="./frontend/UI_IMG/inbox_and_detail_email.png" width="400"></td>
+    <td><img src="./frontend/UI_IMG/inbox_select_email.png" width="400"></td>
+  </tr>
+  <tr>
+    <td><img src="./frontend/UI_IMG/compose.png" width="400"></td>
+    <td><img src="./frontend/UI_IMG/setting.png" width="400"></td>
+  </tr>
+</table>
 
 ## 4. Cấu trúc thư mục
 
