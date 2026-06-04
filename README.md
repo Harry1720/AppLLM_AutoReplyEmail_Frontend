@@ -139,7 +139,7 @@ Mở trình duyệt và truy cập <http://localhost:3000> để sử dụng ứ
 3. **Xử lý token:** Trang `/auth/callback` nhận code, gửi cho Backend (`POST /auth/google-login`) để đổi lấy JWT token.
 4. **Workspace:** Người dùng được chuyển hướng vào không gian làm việc (`/workspace`), ứng dụng gọi API lấy danh sách email và cho phép thao tác (đọc, gửi, xóa, sinh câu trả lời AI).
 
-## 8. Lỗi thường gặp (Troubleshooting)
+## 8. Lỗi thường gặp
 
 - **Lỗi đăng nhập / Xác thực:** Kiểm tra lại `NEXT_PUBLIC_GOOGLE_CLIENT_ID` và URI chuyển hướng trong Google Cloud Console. Đảm bảo backend đang chạy.
 - **Không lấy được danh sách email:** Mở Developer Tools trên trình duyệt kiểm tra Console / Network để xem JWT token đã được gắn vào Header của request chưa, hoặc tài khoản đã cấp đủ quyền đọc/gửi Gmail API chưa.
