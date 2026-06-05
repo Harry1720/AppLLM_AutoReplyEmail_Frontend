@@ -155,3 +155,7 @@ _Trường Đại học Giao thông Vận tải TP.HCM_
 ## 10. Mã nguồn Backend của dự án
 
 Truy cập: <https://github.com/Harry1720/AppLLM_AutoReplyEmail_Backend>
+
+## 11. Video demo
+
+Truy cập: <https://youtu.be/kkgnnmsziUI>
