@@ -126,7 +126,6 @@ Mở trình duyệt và truy cập <http://localhost:3000> để sử dụng ứ
 
 ## 6. Tài liệu dự án
 
-- [Báo cáo](/frontend/DOCS/22H1120002_22H1120095_DeTai6_BaoCaoTTTN.pdf)
 - [Hướng dẫn sử dụng](/frontend/DOCS/22H1120002_22H11200095_TaiLieuHDSD_DeTai6.pdf)
 - [Hướng dẫn cài đặt](/frontend//DOCS/22H1120002_22H11200095_TaiLieuCaiDat_DeTai6.pdf)
 
